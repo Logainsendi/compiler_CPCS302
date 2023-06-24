@@ -1,0 +1,478 @@
+/**
+ * JJTree template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(MyNewGrammar)
+package CPCS302Project2;
+
+public class MyNewGrammar
+{
+public static void main(String args []) throws ParseException
+{
+MyNewGrammar parser = new MyNewGrammar(System.in);
+System.out.println("***** Welcome to Beta programming language *****");
+while (true){
+System.out.print("\nEnter your input: ");
+try
+{
+SimpleNode n = MyNewGrammar.start();
+n.dump(" ß ");
+System.out.println("Syntactically correct statement");
+}
+catch (Exception e)
+{
+System.out.println("Syntactically NOT correct statement");
+System.out.println(e.getMessage());
+break;
+}
+}
+}
+}
+
+PARSER_END(MyNewGrammar)
+//ß
+SKIP :
+{
+  < whitespace: " " >
+| < newLine1: "\r" >
+| < tab: "\t" >
+| < newLine2: "\n" >
+}
+
+//////////////////////////////////////
+
+TOKEN : /* Arithmetic Operators  */
+{
+  < addition: "ß+" >
+| < subtraction : "ß-" >
+| < mult : "ß*" >
+| < division: "ß/" >
+| < assign: "ß=" >
+}
+//////////////////////////////////////
+TOKEN : /* Logical Operators */
+{
+  < and: "ß&" >
+| < or : "ß|" >
+| < not : "ß!" >
+}
+/////////////////////////////////////
+
+TOKEN : /* Relational Operators */
+{
+  < less: "ß<" >
+| < lessOrEqual : "ß<=" >
+| < greater : "ß>" >
+| < greatOrEqual: "ß >=" >
+| < equal : "ß==" >
+| < notEqual : "ß!=" >
+}
+//////////////////////////////////////
+
+TOKEN : /* letter */
+{
+  < letter: (["a"-"z","A"-"Z"])+>
+}
+
+/////////////////////////////////////
+
+TOKEN : /* Punctuation Marks */
+{
+	< dblquotation: "\"" >  
+	| < lftBraceSqu : "[" >
+	| < ritBraceSqu: "]" >
+	| < period: "." >
+	| < comma: "," >
+	
+}
+
+////////////////////////////////////
+
+TOKEN : /* Identifiers */
+{
+	< identifier:  (< beta >) < letter > (<letter >|< Digits >)+ >
+}
+
+
+TOKEN : /* Keywords */
+{
+	< If: "ifß" >
+| 	< Else: "elseß" >
+| 	< then: "thenß" >
+| 	< exit: "exitß" >
+| 	< arrayKey: "ARRAYß" >
+| 	< listKey: "LISTß" >
+|	< iterationKey: "iterateß" >
+|   < printKey: "printß" >
+| < beta: "ß" >
+}
+
+TOKEN : /* Data Type */
+{
+	< integerKey: "INTß" >
+| 	< FloatKey: "FLOATß" >
+| 	< constantKey: "CONSTß" >
+|	< letterKey: "letterß" >
+|   < BooleanKey: "BOOLß ">
+}
+
+
+///////////////////////////////////
+TOKEN : /* digits */
+{
+    < #Digits: ["0"-"9"] >
+| 	< integer:  (< Digits >)+  >
+| 	< Float: (< Digits >)*(< period >)(< Digits >)+  >
+}
+//////////////////////////////////
+
+
+
+SimpleNode start(): { Token t; }
+{
+  Stmts() period()
+  {
+    return jjtThis;
+  }
+|  Comment()
+{
+  return jjtThis;
+}
+}
+
+void Stmts(): { Token t; }
+{
+  stringArr()
+| List()
+| iteration()
+| LOOKAHEAD(3)Assignment()
+| ifStmt()
+| printStmt()
+| arithmeticStmt()
+| logicalStmt()
+| LOOKAHEAD(3)Stmt()
+| relationalStmt()
+| declarationStmt()
+}
+
+
+void Comment():{ Token t; }
+{
+  beta()beta() ((digit()|letter()|PunctuationMarks())+)  beta()beta()
+}
+
+
+void Assignment():{ }
+{
+  (identifier()) (assign()) Stmt()
+}
+
+void Stmt():{ }
+{
+  ((identifier())| letter()| digit()) (arithmeticStmt()| relationalStmt()|logicalStmt())?
+}
+
+
+void stringArr() :{ }
+{
+ arrayKey() (identifier()) (assign()) (lftBraceSqu()) (letter())+ (comma()(letter()))* (ritBraceSqu()) 
+}
+
+
+void List() :{ }
+{
+  
+  listKey()(identifier())  (assign()) (lftBraceSqu()) (digit() | letter())+ ((comma())(digit() | letter()))* (ritBraceSqu()) 
+}
+
+
+void ifStmt() :{ }
+{
+  If() lftBraceSqu() condition() ritBraceSqu()  (Stmt())+ (Else() Stmt())*
+}
+
+void iteration() :{ }
+{
+
+  iterationKey() lftBraceSqu() condition() ritBraceSqu() (Stmt()period())*
+}
+
+
+void condition() :{ }
+{
+
+  (identifier() | digit()) (RelationalOp() | LogicalOp()) (identifier() |digit())
+}
+
+
+void declarationStmt() : { }
+{
+   DataType() (identifier())
+   
+}
+
+
+void DataType () : { }
+{
+ integerKey() |  FloatKey() | constantKey() | letterKey() |  BooleanKey()
+ }
+
+
+void relationalStmt(): { } {
+ RelationalOp() (identifier()| digit())
+}
+
+void logicalStmt(): { } {
+ LogicalOp() (identifier()| digit())
+}
+
+void arithmeticStmt(): { } {
+ ArithmeticOp() (identifier()| digit())
+}
+
+void printStmt(): { } {
+printKey() beta() dblquotation() (letter()|digit()| PunctuationMarks()) dblquotation()  beta() 
+}
+
+
+void RelationalOp(): { }
+{
+less()
+| lessOrEqual()
+| greater()
+| greatOrEqual()
+| equal()
+| notEqual()
+}
+
+void LogicalOp(): { } {
+and()
+| or ()
+| not()
+}
+
+void ArithmeticOp(): { }
+{
+addition()
+| subtraction()
+| mult()
+| division()
+| assign()
+}
+
+void digit(): { } {
+Float() | integer()
+}
+
+
+void PunctuationMarks(): { } {
+ lftBraceSqu()
+| ritBraceSqu()
+| period()
+| comma()
+| dblquotation()
+}
+
+
+void iterationKey() :{ Token t;}
+{
+  t=< iterationKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void then() :{Token t; }
+{
+  t=< then > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void exit() :{Token t; }
+{
+  t=< exit > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void integerKey() :{Token t; }
+{
+  t=< integerKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void FloatKey() :{Token t; }
+{
+  t=< FloatKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void constantKey() :{ Token t;}
+{
+  t=< constantKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void arrayKey() :{Token t; }
+{
+  t=< arrayKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void listKey() :{ Token t;}
+{
+  t=< listKey > { jjtThis.jjtSetValue(t.image); }
+   
+}
+
+void If():{ Token t; }
+{
+t=< If > { jjtThis.jjtSetValue(t.image); }
+}
+void Else():{ Token t; }
+{
+t=< Else > { jjtThis.jjtSetValue(t.image); }
+}
+  
+void dblquotation():{ Token t; }
+{
+t=< dblquotation > { jjtThis.jjtSetValue(t.image); }
+}
+
+void lftBraceSqu() :{ Token t; }
+{
+t=< lftBraceSqu > { jjtThis.jjtSetValue(t.image); }
+}
+
+void ritBraceSqu() :{ Token t; }
+{
+t=< ritBraceSqu > { jjtThis.jjtSetValue(t.image); }
+}
+
+void period() :{ Token t; }
+{
+t=< period > { jjtThis.jjtSetValue(t.image); }
+}
+
+void comma() :{ Token t; }
+{
+t=< comma > { jjtThis.jjtSetValue(t.image); }
+}
+
+void beta() :{ Token t; }
+{
+t=< beta > { jjtThis.jjtSetValue(t.image); }
+}
+
+void integer() :{ Token t; }
+{
+t=< integer > { jjtThis.jjtSetValue(t.image); }
+}
+
+void Float() :{ Token t; }
+{
+t=< Float > { jjtThis.jjtSetValue(t.image); }
+}
+
+
+
+void identifier() :{ Token t; }
+{
+t=< identifier > { jjtThis.jjtSetValue(t.image); }
+}
+
+
+void addition() :{ Token t; }
+{
+t=< addition > { jjtThis.jjtSetValue(t.image); }
+}
+
+void subtraction() :{ Token t; }
+{
+t=< subtraction > { jjtThis.jjtSetValue(t.image); }
+}
+
+void mult() :{ Token t; }
+{
+t=< mult > { jjtThis.jjtSetValue(t.image); }
+}
+
+void division() :{ Token t; }
+{
+t=< division > { jjtThis.jjtSetValue(t.image); }
+}
+
+void assign() :{ Token t; }
+{
+t=< assign > { jjtThis.jjtSetValue(t.image); }
+}
+
+void and() :{ Token t; }
+{
+t=< and > { jjtThis.jjtSetValue(t.image); }
+}
+
+void or() :{ Token t; }
+{
+t=< or > { jjtThis.jjtSetValue(t.image); }
+}
+
+void not() :{ Token t; }
+{
+t=< not > { jjtThis.jjtSetValue(t.image); }
+}
+
+void less() :{ Token t; }
+{
+t=< less > { jjtThis.jjtSetValue(t.image); }
+}
+
+void lessOrEqual() :{ Token t; }
+{
+t=< lessOrEqual > { jjtThis.jjtSetValue(t.image); }
+}
+
+void greater() :{ Token t; }
+{
+t=< greater > { jjtThis.jjtSetValue(t.image); }
+}
+
+void greatOrEqual() :{ Token t; }
+{
+t=< greatOrEqual > { jjtThis.jjtSetValue(t.image); }
+}
+
+void equal() :{ Token t; }
+{
+t=< equal > { jjtThis.jjtSetValue(t.image); }
+}
+
+void notEqual() :{ Token t; }
+{
+t=< notEqual > { jjtThis.jjtSetValue(t.image); }
+}
+
+void letter() :{ Token t; }
+{
+t=< letter > { jjtThis.jjtSetValue(t.image); }
+}
+
+void letterKey() :{ Token t; }
+{
+t=< letterKey > { jjtThis.jjtSetValue(t.image); }
+}
+
+void BooleanKey() :{ Token t; }
+{
+t=< BooleanKey > { jjtThis.jjtSetValue(t.image); }
+}
+
+void printKey() :{ Token t; }
+{
+t=< printKey > { jjtThis.jjtSetValue(t.image); }
+}
+
+
+

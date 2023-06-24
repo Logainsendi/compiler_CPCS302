@@ -1,0 +1,305 @@
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(MyNewGrammar)
+package CPCS302Project;
+
+public class MyNewGrammar
+{
+public static void main(String args []) throws ParseException
+{
+MyNewGrammar parser = new MyNewGrammar(System.in);
+System.out.println("***** Welcome to Beta programming language *****");
+while (true){
+System.out.print("\nEnter your input: ");
+try
+{
+MyNewGrammar.start();
+System.out.println("Syntactically correct statement");
+}
+catch (Exception e)
+{
+System.out.println("Syntactically NOT correct statement");
+System.out.println(e.getMessage());
+break;
+}
+}
+}
+}
+
+PARSER_END(MyNewGrammar)
+//ß
+SKIP :
+{
+  < whitespace: " " >
+| < newLine1: "\r" >
+| < tab: "\t" >
+| < newLine2: "\n" >
+}
+
+//////////////////////////////////////
+
+TOKEN : /* Arithmetic Operators  */
+{
+  < addition: "ß+" >
+| < subtraction : "ß-" >
+| < mult : "ß*" >
+| < division: "ß/" >
+| < assign: "ß=" >
+}
+//////////////////////////////////////
+TOKEN : /* Logical Operators */
+{
+  < and: "ß&" >
+| < or : "ß|" >
+| < not : "ß!" >
+}
+/////////////////////////////////////
+
+TOKEN : /* Relational Operators */
+{
+  < less: "ß<" >
+| < lessOrEqual : "ß<=" >
+| < greater : "ß>" >
+| < greatOrEqual: "ß >=" >
+| < equal : "ß==" >
+| < notEqual : "ß!=" >
+}
+//////////////////////////////////////
+
+TOKEN : /* letter */
+{
+  < letter: (["a"-"z","A"-"Z"])+>
+}
+
+/////////////////////////////////////
+
+TOKEN : /* Punctuation Marks */
+{
+	< dblquotation: " \" " >  
+	| < lftBraceSqu : "[" >
+	| < ritBraceSqu: "]" >
+	| < period: "." >
+	| < comma: "," >
+	
+}
+
+////////////////////////////////////
+
+TOKEN : /* Identifiers */
+{
+	< identifier:  (< beta >)(< letter >) (<letter >|< integer >|< Float>)+ >  
+}
+////////////////////////////////////
+
+TOKEN : /* Keywords */
+{
+	< If: "ifß" >
+| 	< Else: "elseß" >
+| 	< then: "thenß" >
+| 	< exit: "exitß" >
+| 	< arrayKey: "ARRAYß" >
+| 	< listKey: "LISTß" >
+|	< iterationKey: "iterateß" >
+|   < printKey: "printß" >
+| < beta: "ß" >
+}
+//////////////////////////////////
+
+TOKEN : /* Data Type */
+{
+	< integerKey: "INTß" >
+| 	< FloatKey: "FLOATß" >
+| 	< constantKey: "CONSTß" >
+|	< letterKey: "letterß" >
+|   < BooleanKey: "BOOLß ">
+}
+
+///////////////////////////////////
+TOKEN : /* digits */
+{
+    < #Digits: ["0"-"9"] >
+| 	< integer:  (< Digits >)+  >
+| 	< Float: (< Digits >)*(< period >)(< Digits >)+  >
+}
+//////////////////////////////////
+
+
+
+ void start(): {  }
+{
+   Stmts() < period >|   Comment() 
+
+}
+
+void Stmts(): { }
+{
+  stringArr()
+| List()
+| iteration()
+| LOOKAHEAD(3)Assignment()
+| ifStmt()
+| printStmt()
+| arithmeticStmt()
+| logicalStmt()
+| LOOKAHEAD(3)Stmt()
+| relationalStmt()
+| declarationStmt()
+}
+
+void Comment():{ }
+{
+   < beta >< beta > ((digit()|< letter > | PunctuationMarks() )+)  < beta >< beta >
+   {
+     System.out.println("Found a Comment");
+   }
+}
+
+
+void Assignment():{ }
+{
+  < identifier > <assign > Stmt()
+   {
+     System.out.println("Found an assignment statement");
+   }
+}
+
+void Stmt():{ }
+{
+  < identifier >| < letter >| digit() (arithmeticStmt()| relationalStmt()|logicalStmt())?
+}
+
+
+void stringArr() :{ }
+{
+<  arrayKey > <identifier >  <assign > <lftBraceSqu > (<letter >)+  (< comma > <letter >)* < ritBraceSqu >
+       {
+     System.out.println("Found a string array");
+   }
+}
+
+
+void List() :{ }
+{
+  
+  < listKey ><identifier >  <assign > <lftBraceSqu > (digit() |  < letter >)+ ((< comma >) (digit() |  < letter >))* < ritBraceSqu >
+         {
+     System.out.println("Found a list");
+   }
+}
+
+
+void ifStmt() :{ }
+{
+  < If > <lftBraceSqu > condition() <ritBraceSqu >  (Stmt())+ (< Else > Stmt())*
+         {
+     System.out.println("Found an if statement");
+   }
+}
+
+void iteration() :{ }
+{
+
+  < iterationKey > <lftBraceSqu > condition() < ritBraceSqu > (Stmt()< period >)*
+         {
+     System.out.println("Found an iteration statement");
+   }
+}
+
+
+void condition() :{ }
+{
+
+  (    < identifier > | digit() )(RelationalOp() | LogicalOp()) ( < identifier > | digit())
+         {
+     System.out.println("Found a condition");
+   }
+}
+
+
+
+void declarationStmt() : { }
+{
+   DataType() (< identifier >)
+{
+  
+   System.out.println("Found a Boolean Statement");
+ }
+}
+
+
+void DataType () : { }
+{
+ < integerKey > |  < FloatKey > | < constantKey >| < letterKey > | < BooleanKey >
+ }
+
+
+
+void relationalStmt(): { } {
+ RelationalOp() (< identifier >| digit())
+            {
+     System.out.println("Found a relational statement");
+   }
+}
+
+void logicalStmt(): { } {
+ LogicalOp() (< identifier >| digit())
+             {
+     System.out.println("Found a logical statement");
+   }
+}
+
+void arithmeticStmt(): { } {
+ ArithmeticOp() (< identifier >| digit())
+             {
+     System.out.println("Found a arithmetic statement");
+   }
+}
+
+void printStmt(): { } {
+< printKey >  <beta > <dblquotation > (< letter >|digit()| PunctuationMarks()) < dblquotation >  <beta >
+            {
+     System.out.println("Found a print statement");
+   }
+}
+
+
+void RelationalOp(): { }
+{
+< less>
+| < lessOrEqual >
+| < greater >
+| < greatOrEqual >
+| < equal >
+| < notEqual >
+}
+
+void LogicalOp(): { } {
+< and >
+| < or >
+| < not >
+}
+
+void ArithmeticOp(): { }
+{
+< addition >
+| < subtraction >
+| < mult >
+|<  division >
+|<  assign >
+}
+
+void digit(): { } {
+< Float > | < integer >
+}
+
+
+void PunctuationMarks(): { } {
+ < lftBraceSqu >
+| < ritBraceSqu >
+| < period >
+| < comma >
+| < dblquotation >
+}
